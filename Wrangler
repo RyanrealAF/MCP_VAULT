@@ -1,0 +1,12 @@
+name = "mcp-dummies-edge"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# ENTRY POINT: Define your buildwhilebleeding.com sub-route here if not using workers.dev
+# routes = [
+#   { pattern = "mcp.buildwhilebleeding.com", zone_name = "buildwhilebleeding.com" }
+# ]
