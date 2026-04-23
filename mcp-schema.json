@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Server Schema",
+  "description": "Defines the structural requirements for MCP servers, including L1/L2 protocol specifications.",
+  "type": "object",
+  "properties": {
+    "serverName": {
+      "type": "string",
+      "description": "The unique name of the MCP server."
+    },
+    "protocolVersion": {
+      "type": "string",
+      "enum": ["1.0", "2.0"],
+      "description": "The L1/L2 protocol version."
+    }
+  },
+  "required": ["serverName", "protocolVersion"]
+}
