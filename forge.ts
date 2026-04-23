@@ -3,7 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 
 /**
  * ARCHITECTURAL RULE:
- * Gemini calls this script to "forge" a new MCP server.
+ * ChatGPT Codex calls this script to "forge" a new MCP server.
  * It handles the $0 budget deployment to Cloudflare.
  */
 
