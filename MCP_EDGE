@@ -1,0 +1,89 @@
+import { 
+  Client, 
+  Server 
+} from "@modelcontextprotocol/sdk/server/index.js";
+import { 
+  CallToolRequestSchema, 
+  ListToolsRequestSchema,
+  Tool 
+} from "@modelcontextprotocol/sdk/types.js";
+
+/**
+ * ARCHITECTURAL NOTE: 
+ * Using Cloudflare Workers for MCP Servers allows for global low-latency tool execution.
+ * We implement a schema-first approach to ensure the LLM has strict boundaries.
+ */
+
+const TOOLS: Tool[] = [
+  {
+    name: "get_episode_packet",
+    description: "Retrieves the core information packet for a specific MCP training episode.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        episodeNumber: { type: "number", minimum: 1, maximum: 7 }
+      },
+      required: ["episodeNumber"]
+    }
+  },
+  {
+    name: "list_capabilities",
+    description: "Lists all conceptual capabilities of the MCP protocol defined in the series.",
+    inputSchema: { type: "object", properties: {} }
+  }
+];
+
+export default {
+  async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
+    const server = new Server(
+      { name: "mcp-dummies-server", version: "1.0.0" },
+      { capabilities: { tools: {} } }
+    );
+
+    // Tool Listing Handler
+    server.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: TOOLS
+    }));
+
+    // Tool Execution Handler
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      try {
+        switch (name) {
+          case "get_episode_packet":
+            const ep = args?.episodeNumber as number;
+            return {
+              content: [{ type: "text", text: `Information packet for Episode ${ep} retrieved from edge.` }]
+            };
+
+          case "list_capabilities":
+            return {
+              content: [{ type: "text", text: "Clients, Servers, Tools, Resources, Prompts." }]
+            };
+
+          default:
+            throw new Error(`Tool ${name} not found`);
+        }
+      } catch (error: any) {
+        return {
+          isError: true,
+          content: [{ type: "text", text: error.message }]
+        };
+      }
+    });
+
+    // MCP over SSE/HTTP Transport Bridge
+    // ENTRY POINT: Handle the protocol handshake and JSON-RPC over HTTP
+    const { method } = request;
+    if (method === "POST") {
+      const json = await request.json();
+      const response = await server.handleRequest(json);
+      return new Response(JSON.stringify(response), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    return new Response("MCP Server Active", { status: 200 });
+  }
+};
