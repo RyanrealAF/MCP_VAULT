@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0"
-  }
+  },
+  "scripts": {
+    "forge": "node forge.ts"
+  },
+  "type": "module"
 }
